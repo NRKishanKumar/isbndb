@@ -35,48 +35,31 @@ function getAwardedAuthorByYear(year, next) {
     })
 }
 
-function getRetailInventory(params, next) {
-    const collection = db.get().collection('books');
-    return new Promise(async (resolve, reason) => {
-        try {
-            await collection.aggregate([{
-                $lookup:
-                    {
-                        from: "authors",
-                        localField: "author",
-                        foreignField: "name",
-                        as: "owner"
-                    }
-            }, {"$unwind": "$owner"}, {
-                "$group": {
-                    _id: "$_id",
-                    "TotalAmount": {
-                        "$sum": "$price"
-                    },
-                    "noOfBooks": {
-                        "$sum": "$sold"
-                    }
-                }
-            }])
-                .toArray((err, result) => {
-                    resolve(result);
-                    next && next(null, result);
-                });
-        } catch (e) {
-            reason(e);
-            next && next(e);
-        }
-    })
-}
-
 function getAuthorByQuery (params, next) {
     const collection = db.get().collection('authors');
     return new Promise(async (resolve, reason) => {
         try {
-            collection.find({ $and : [
-                    {dob: { $gte: params.dob }}
-                ]
-            })
+            let { birthDate, totalPrice } = params;
+            collection.find([
+                { $match : { "dob" : new Date(birthDate) } },
+                {$lookup:{
+                        from: "books",
+                        localField: "name",
+                        foreignField: "author",
+                        as: "owner"
+                    }}, {"$unwind": "$owner"},
+                {"$group": {
+                        _id: "$_id",
+                        "TotalAmount": {
+                            "$sum": "$owner.price"
+                        }
+                    }},
+                {
+                    $match: {
+                        "TotalAmount": { "$gte": totalPrice }
+                    }
+                }
+            ])
                 .toArray((err, result) => {
                     resolve(result);
                     next && next(null, result);

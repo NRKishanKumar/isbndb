@@ -9,7 +9,7 @@ router.get('/', function(req, res, next) {
     let queryParams = {
         ...req.query
     }
-    let { awards, year } = queryParams;
+    let { awards, year, birthDate, totalPrice } = queryParams;
     if (awards) {
         console.log(awards);
         getAuthorByAwards(awards)
@@ -23,6 +23,14 @@ router.get('/', function(req, res, next) {
             .then(res => {
                 let result = JSON.parse(JSON.stringify(res))
                 console.log(result, "getAwardedAuthorByYear")
+                res.json({data: result});
+            })
+            .catch(err => res.send(err))
+    } else if(birthDate && totalPrice) {
+        getAuthorByQuery(queryParams)
+            .then(res => {
+                let result = JSON.parse(JSON.stringify(res))
+                console.log(result, "getAuthorByQuery")
                 res.json({data: result});
             })
             .catch(err => res.send(err))
