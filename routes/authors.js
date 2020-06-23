@@ -1,4 +1,5 @@
-let {getAuthorByAwards, getAwardedAuthorByYear} = require("../repository/isbn/authors.db");
+let {getAuthorByAwards, getAwardedAuthorByYear,
+    getRetailInventory, getAuthorByQuery} = require("../repository/isbn/authors.db");
 
 var express = require('express');
 var router = express.Router();

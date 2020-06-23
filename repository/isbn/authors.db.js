@@ -8,7 +8,6 @@ function getAuthorByAwards(awards, next) {
             collection.find({
                 $where: `this.awards.length > ${awards}`
             }).toArray((err, result) => {
-                console.log(err, result, "what is this");
                 resolve(result);
                 next && next(null, result);
             });
@@ -36,9 +35,44 @@ function getAwardedAuthorByYear(year, next) {
     })
 }
 
-function
+function getRetailInventory(params, next) {
+    const collection = db.get().collection('books');
+    return new Promise(async (resolve, reason) => {
+        try {
+            collection.find({})
+                .toArray((err, result) => {
+                    resolve(result);
+                    next && next(null, result);
+                });
+        } catch (e) {
+            reason(e);
+            next && next(e);
+        }
+    })
+}
+
+function getAuthorByQuery (params, next) {
+    const collection = db.get().collection('authors');
+    return new Promise(async (resolve, reason) => {
+        try {
+            collection.find({ $and : [
+                    {dob: { $gte: params.dob }}
+                ]
+            })
+                .toArray((err, result) => {
+                    resolve(result);
+                    next && next(null, result);
+                });
+        } catch (e) {
+            reason(e);
+            next && next(e);
+        }
+    })
+}
 
 module.exports = {
     getAuthorByAwards,
-    getAwardedAuthorByYear
+    getAwardedAuthorByYear,
+    getRetailInventory,
+    getAuthorByQuery,
 };
